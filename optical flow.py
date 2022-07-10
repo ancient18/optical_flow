@@ -12,13 +12,13 @@ def calcuate_flow(im1, im2):
     hsv[...,0] = ang*180/np.pi/2
     hsv[...,1] = 255
     hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
-    # print(hsv.shape)
-    bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-    cv2.imshow('result',bgr)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    print(hsv.shape)
+    # bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+    # cv2.imshow('result',bgr)
+    # cv2.waitKey()
+    # cv2.destroyAllWindows()
     return hsv
 
-# im1 = cv2.imread('000105.png')
-# im2 = cv2.imread('000106.png')
-# calcuate_flow(im1,im2)
+im1 = cv2.imread('000105.png')
+im2 = cv2.imread('000106.png')
+calcuate_flow(im1,im2)

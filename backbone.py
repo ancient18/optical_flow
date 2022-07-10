@@ -62,8 +62,20 @@ class Backbone(nn.Module):
             nn.PReLU()
         )
 
-    def forward(self, x):
+    def _initialize_weights(self):
+        # print(self.modules())
 
+        for m in self.modules():
+            # print(m)
+            if isinstance(m, nn.Linear):
+                # print(m.weight.data.type())
+                # input()
+                # m.weight.data.fill_(1.0)
+                nn.init.xavier_uniform_(m.weight, gain=1)
+                # print(m.weight)
+
+    def forward(self, x):
+        self._initialize_weights()
         x = self.layer1(x)
         x = self.layer2(x) + x
         x = self.layer3(x) + x
@@ -87,7 +99,7 @@ class Backbone(nn.Module):
         return x1, x2
 
 
-img = cv2.imread("./car.png")
+img = cv2.imread("./000105.png")
 
 
 tfms = transforms.Compose([
@@ -99,5 +111,5 @@ tfms = transforms.Compose([
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # BGR-->RGB
 img = tfms(img)  # 转化为tensor 并 归一化
 print(img.shape)
-a = Backbone()
-a(img)
+net = Backbone()
+net(img)
