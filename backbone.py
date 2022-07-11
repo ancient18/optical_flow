@@ -113,3 +113,4 @@ img = tfms(img)  # 转化为tensor 并 归一化
 print(img.shape)
 net = Backbone()
 net(img)
+
