@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 
-
 class DeformConv2d2(nn.Module):
     def __init__(self, inc, outc, kernel_size=3, padding=1, stride=1, bias=None, modulation=False):
 

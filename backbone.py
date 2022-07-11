@@ -3,6 +3,8 @@ import torch
 import torch.nn.functional as F
 import cv2
 from torchvision import transforms
+from de_conv1 import DeformConv2d1
+from transpose import Transpose
 
 
 class Backbone(nn.Module):
@@ -62,6 +64,7 @@ class Backbone(nn.Module):
             nn.PReLU()
         )
 
+    # 参数初始化
     def _initialize_weights(self):
         # print(self.modules())
 
@@ -78,6 +81,7 @@ class Backbone(nn.Module):
         self._initialize_weights()
         x = self.layer1(x)
         x = self.layer2(x) + x
+
         x = self.layer3(x) + x
         x = self.layer4(x)
 
@@ -91,12 +95,12 @@ class Backbone(nn.Module):
         x = self.layer9(x) + x
         x = self.layer10(x)
         x = [t1, t2, t3, x]
-        x = torch.cat(x, dim=0)
+        x = torch.cat(x, dim=1)
         x = self.layer11(x)
-        print(x.shape)
-        x1 = x[:, 0:128, :, :]
-        x2 = x[:, 128:256, :, :]
-        return x1, x2
+        # x1 = x[:, 0:128, :, :]
+        # x2 = x[:, 128:256, :, :]
+        # return x1, x2
+        return x
 
 
 img = cv2.imread("./000105.png")
@@ -110,7 +114,17 @@ tfms = transforms.Compose([
 
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # BGR-->RGB
 img = tfms(img)  # 转化为tensor 并 归一化
-print(img.shape)
+img = torch.rand([4, 3, 12, 24])
 net = Backbone()
-net(img)
+de_conv = DeformConv2d1(128, 128)
+trans = Transpose()
 
+x = net(img)
+print(x.shape)
+x, offset, modulation = de_conv(x)
+x = trans(x)
+print(offset.shape)
+print(modulation.shape)
+print(x.shape)
+x = img+x
+print(x.shape)

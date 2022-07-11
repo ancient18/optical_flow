@@ -3,7 +3,7 @@ from torch import nn
 
 
 class DeformConv2d1(nn.Module):
-    def __init__(self, inc, outc, kernel_size=3, padding=1, stride=1, bias=None, modulation=False):
+    def __init__(self, inc, outc, kernel_size=3, padding=1, stride=1, bias=None, modulation=True):
 
         super(DeformConv2d1, self).__init__()
         self.kernel_size = kernel_size
@@ -17,10 +17,10 @@ class DeformConv2d1(nn.Module):
             inc, 2*kernel_size*kernel_size, kernel_size=3, padding=1, stride=stride)  # 偏移量
 
         self.p_conv1 = nn.Conv2d(
-            2*kernel_size*kernel_size, 2*kernel_size*kernel_size, kernel_size=3, padding=1, stride=stride)
+            2*kernel_size*kernel_size, 4*kernel_size*kernel_size, kernel_size=3, padding=1, stride=stride)
 
         self.p_conv2 = nn.Conv2d(
-            2*kernel_size*kernel_size, 2*kernel_size*kernel_size, kernel_size=3, padding=1, stride=stride)
+            4*kernel_size*kernel_size, 2*kernel_size*kernel_size, kernel_size=3, padding=1, stride=stride)
 
         nn.init.constant_(self.p_conv.weight, 0)
         nn.init.constant_(self.p_conv1.weight, 0)
@@ -37,16 +37,25 @@ class DeformConv2d1(nn.Module):
                 inc, kernel_size*kernel_size, kernel_size=3, padding=1, stride=stride)  # 权重
             nn.init.constant_(self.m_conv.weight, 0)
             self.m_conv.register_full_backward_hook(self._set_lr)
+            self.m_conv1 = nn.Conv2d(
+                kernel_size*kernel_size, 2*kernel_size*kernel_size, kernel_size=3, padding=1, stride=stride)  # 权重
+            nn.init.constant_(self.m_conv1.weight, 0)
+            self.m_conv1.register_full_backward_hook(self._set_lr)
+            self.m_conv2 = nn.Conv2d(
+                2*kernel_size*kernel_size, kernel_size*kernel_size, kernel_size=3, padding=1, stride=stride)  # 权重
+            nn.init.constant_(self.m_conv2.weight, 0)
+            self.m_conv2.register_full_backward_hook(self._set_lr)
 
     @staticmethod
     def _set_lr(module, grad_input, grad_output):
         grad_input = (grad_input[i] * 0.1 for i in range(len(grad_input)))
         grad_output = (grad_output[i] * 0.1 for i in range(len(grad_output)))
 
-    def fn(self, x, offset):
-        if self.modulation:
-            m = torch.sigmoid(self.m_conv(x))
-
+    def fn(self, x, offset, modulation=None):
+        # if self.modulation:
+        #     m = torch.sigmoid(self.m_conv(x))
+        if modulation is not None:
+            m = modulation
         dtype = offset.data.type()
         ks = self.kernel_size
         N = offset.size(1) // 2
@@ -96,7 +105,7 @@ class DeformConv2d1(nn.Module):
             g_rt.unsqueeze(dim=1) * x_q_rt
 
         # modulation
-        if self.modulation:
+        if modulation is not None:
             m = m.contiguous().permute(0, 2, 3, 1)
             m = m.unsqueeze(dim=1)
             m = torch.cat([m for _ in range(x_offset.size(1))], dim=1)
@@ -106,16 +115,21 @@ class DeformConv2d1(nn.Module):
         return x_offset
 
     def forward(self, x):
-        offset1 = self.p_conv(x)
-        x_offset1 = self.fn(x, offset1)
+        p1 = self.p_conv(x)
+        m1 = torch.sigmoid(self.m_conv(x))
+        x_offset1 = self.fn(x, p1, m1)
         out1 = self.conv(x_offset1)
-        offset2 = self.prelu(offset1)
-        offset2 = self.p_conv1(offset2)
-        offset2 = self.prelu(offset2)
-        offset2 = self.p_conv2(offset2)
-        x_offset2 = self.fn(out1, offset2)
+        p2 = self.prelu(p1)
+        p2 = self.p_conv1(p2)
+        p2 = self.prelu(p2)
+        p2 = self.p_conv2(p2)
+        m2 = torch.sigmoid(self.m_conv1(m1))
+        m2 = torch.sigmoid(self.prelu(m2))
+        m2 = torch.sigmoid(self.m_conv2(m2))
+        m2 = torch.sigmoid(self.prelu(m2))
+        x_offset2 = self.fn(out1, p2, m2)
         out2 = self.conv(x_offset2)
-        return out2
+        return out2, p1, m1
 
     def _get_p_n(self, N, dtype):
         p_n_x, p_n_y = torch.meshgrid(
@@ -175,9 +189,7 @@ class DeformConv2d1(nn.Module):
         return x_offset
 
 
-x = torch.rand([4, 128, 12, 7])
+# x = torch.rand([4, 128, 6, 12])
 
-net = DeformConv2d1(128, 128)
-print(net(x))
-
-# adam优化器
+# net = DeformConv2d1(128, 128)
+# print(net(x))
