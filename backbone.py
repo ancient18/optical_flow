@@ -112,19 +112,19 @@ tfms = transforms.Compose([
 ])
 
 
-img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # BGR-->RGB
-img = tfms(img)  # 转化为tensor 并 归一化
-img = torch.rand([4, 3, 12, 24])
-net = Backbone()
-de_conv = DeformConv2d1(128, 128)
-trans = Transpose()
+# img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # BGR-->RGB
+# img = tfms(img)  # 转化为tensor 并 归一化
+# img = torch.rand([4, 3, 12, 24])
+# net = Backbone()
+# de_conv = DeformConv2d1(128, 128)
+# trans = Transpose()
 
-x = net(img)
-print(x.shape)
-x, offset, modulation = de_conv(x)
-x = trans(x)
-print(offset.shape)
-print(modulation.shape)
-print(x.shape)
-x = img+x
-print(x.shape)
+# x = net(img)
+# print(x.shape)
+# x, offset, modulation = de_conv(x)
+# x = trans(x)
+# print(offset.shape)
+# print(modulation.shape)
+# print(x.shape)
+# x = img+x
+# print(x.shape)
