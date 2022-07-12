@@ -6,15 +6,17 @@ import torch.nn.functional as F
 import torchvision.models as models
 from torch.autograd import Variable
 
+
 class VGG(nn.Module):
-    def __init__(self, conv_index, rgb_range=1):
+    def __init__(self, conv_index=None, rgb_range=1):
         super(VGG, self).__init__()
-        vgg_features = models.vgg19(pretrained=True).features
+        vgg_features = models.vgg16(pretrained=True).features
         modules = [m for m in vgg_features]
-        if conv_index == '22':
-            self.vgg = nn.Sequential(*modules[:8])
-        elif conv_index == '54':
-            self.vgg = nn.Sequential(*modules[:35])
+        # if conv_index == '22':
+        #     self.vgg = nn.Sequential(*modules[:8])
+        # elif conv_index == '54':
+        #     self.vgg = nn.Sequential(*modules[:35])
+        self.vgg = nn.Sequential(*modules[:12])
 
         vgg_mean = (0.485, 0.456, 0.406)
         vgg_std = (0.229 * rgb_range, 0.224 * rgb_range, 0.225 * rgb_range)
@@ -26,7 +28,7 @@ class VGG(nn.Module):
             x = self.sub_mean(x)
             x = self.vgg(x)
             return x
-            
+
         vgg_sr = _forward(sr)
         with torch.no_grad():
             vgg_hr = _forward(hr.detach())
@@ -34,3 +36,9 @@ class VGG(nn.Module):
         loss = F.mse_loss(vgg_sr, vgg_hr)
 
         return loss
+
+
+# net = VGG()
+# x1 = torch.rand([4, 3, 12, 24])
+# x2 = torch.rand([4, 3, 12, 24])
+# print(net(x1, x2))

@@ -18,14 +18,28 @@ class GOPRO_Large(DataSet):
         blur_list = []
         sharp_list = []
         if self.train:
-            data_path = os.path.join(self.data_root, 'train')  # D:\dataset\GOPRO_Large\train
+            # D:\dataset\GOPRO_Large\train
+            data_path = os.path.join(self.data_root, 'train')
         else:
-            data_path = os.path.join(self.data_root, 'test')  # D:\dataset\GOPRO_Large\test
-
+            # D:\dataset\GOPRO_Large\test
+            data_path = os.path.join(self.data_root, 'test')
         for gopro_num in os.listdir(data_path):
             for png in os.listdir(os.path.join(data_path, str(gopro_num), 'blur')):
-                blur_list.append(os.path.join(data_path, str(gopro_num), 'blur', png))
-                sharp_list.append(os.path.join(data_path, str(gopro_num), 'sharp', png))
+                blur_list.append(os.path.join(
+                    data_path, str(gopro_num), 'blur', png))
+                sharp_list.append(os.path.join(
+                    data_path, str(gopro_num), 'sharp', png))
 
         assert (len(blur_list) == len(sharp_list))
         return [blur_list, sharp_list]
+
+
+args = {
+    "crop_size": [256, 256],
+    "gaussian_noise": 0.0,
+    "rotation": 0
+
+}
+data = GOPRO_Large(args)
+data.get_list()
+

@@ -1,10 +1,13 @@
 import torch.nn as nn
 import torch
+import torch.nn.functional as F
 
 from de_conv1 import DeformConv2d1
 from backbone import Backbone
 from transpose import Transpose
 from optical_flow import calcuate_flow
+from position_loss import PositionLoss
+from vgg import VGG
 
 
 class MainBranchModule(nn.Module):
@@ -32,17 +35,25 @@ class opticalFlowModel(nn.Module):
         return self.optical_flow(im1, im2)
 
 
-# net1 = MainBranchModule()
-# x = torch.randn(4, 3, 12, 24)
-# x, offset, modulation = net1(x)
+net1 = MainBranchModule()
+x1 = torch.rand([4, 3, 12, 24])
+x1, offset, modulation = net1(x1)
 # print(x.shape)
 # print(offset.shape)
 # print(modulation.shape)
 
 
-
 im1 = torch.rand([4, 3, 12, 24])
 im2 = torch.rand([4, 3, 12, 24])
-net2=opticalFlowModel()
-x = net2(im1, im2)
-print(x.shape)
+net2 = opticalFlowModel()
+x2 = net2(im1, im2)
+# print(x.shape)
+
+
+L1 = torch.nn.MSELoss(reduction='sum')
+L2 = VGG()
+L3 = PositionLoss()
+x2 = F.interpolate(x2, scale_factor=0.5, mode='bilinear')
+print(x2.shape)
+print(offset.shape)
+print(L3(offset, x2))

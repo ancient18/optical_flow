@@ -56,23 +56,28 @@ class GOPRO_Large_all(DataSet):
         frame2_list = []
 
         if self.train:
-            self.data_root = os.path.join(self.data_root, 'train')
-            self.gopro_large_all_data_root = os.path.join(self.gopro_large_all_data_root, 'train')
+            data_path1 = os.path.join(self.data_root, 'train')
+            data_path2 = os.path.join(self.gopro_large_all_data_root, 'train')
         else:
-            self.data_root = os.path.join(self.data_root, 'test')
-            self.gopro_large_all_data_root = os.path.join(self.gopro_large_all_data_root, 'test')
-        for gopro_num in os.listdir(self.data_root):
-            for png in os.listdir(os.path.join(self.data_root, str(gopro_num), 'blur')):  # 得到模糊、清晰图片
-                blur_list.append(os.path.join(self.data_root, str(gopro_num), 'blur', png))
-                sharp_list.append(os.path.join(self.data_root, str(gopro_num), 'sharp', png))
-            all_list = os.listdir(os.path.join(self.gopro_large_all_data_root, gopro_num))  # gopro large all gopro_num 下的所有图片文件名
-            n_frames = int(len(all_list) / len(os.listdir(os.path.join(self.data_root, str(gopro_num), 'blur'))))
+            data_path1 = os.path.join(self.data_root, 'test')
+            data_path2 = os.path.join(self.gopro_large_all_data_root, 'test')
+        print(data_path1)
+        for gopro_num in os.listdir(data_path1):
+            for png in os.listdir(os.path.join(data_path1, str(gopro_num), 'blur')):  # 得到模糊、清晰图片
+                blur_list.append(os.path.join(
+                    data_path1, str(gopro_num), 'blur', png))
+                sharp_list.append(os.path.join(
+                    data_path1, str(gopro_num), 'sharp', png))
+            # gopro large all gopro_num 下的所有图片文件名
+            all_list = os.listdir(os.path.join(data_path2, gopro_num))
+            n_frames = int(
+                len(all_list) / len(os.listdir(os.path.join(data_path1, str(gopro_num), 'blur'))))
 
             # print("gopro_num:{}\tlen(all_list):{}\tn_frames:{}".format(gopro_num, len(all_list), n_frames))
 
             # first_sharp_frame = 0  # 当前gopro_num下，第一个清晰图片对应的清晰帧编号
             # for i in range(0, len(all_list)):
-            #     frame1_path = os.path.join(self.gopro_large_all_data_root, str(gopro_num), all_list[i])
+            #     frame1_path = os.path.join(data_path2, str(gopro_num), all_list[i])
             #     sharp_path = sharp_list[len(frame1_list)]  # 每隔len(frame1_list)张图片，就是下一个gopro_num的第一个清晰图片
             #     image1 = Image.open(frame1_path).convert('RGB')
             #     sharp_image = Image.open(sharp_path).convert('RGB')
@@ -85,9 +90,24 @@ class GOPRO_Large_all(DataSet):
             first_sharp_frame = first_sharp_frame_dic[str(gopro_num)]
             # print("'{}':{},".format(gopro_num, first_sharp_frame))
             for i in range(0, len(all_list), n_frames):
-                frame0_list.append(os.path.join(self.gopro_large_all_data_root, str(gopro_num), all_list[i]))
-                frame1_list.append(os.path.join(self.gopro_large_all_data_root, str(gopro_num), all_list[first_sharp_frame]))
+                frame0_list.append(os.path.join(
+                    data_path2, str(gopro_num), all_list[i]))
+                frame1_list.append(os.path.join(data_path2, str(
+                    gopro_num), all_list[first_sharp_frame]))
                 first_sharp_frame = first_sharp_frame + n_frames
-                frame2_list.append(os.path.join(self.gopro_large_all_data_root, str(gopro_num), all_list[i + n_frames - 1]))
+                frame2_list.append(os.path.join(data_path2, str(
+                    gopro_num), all_list[i + n_frames - 1]))
         # exit(0)
         return [blur_list, sharp_list, frame0_list, frame2_list]
+
+
+args = {
+    "crop_size": [256, 256],
+    "gaussian_noise": 0.0,
+    "rotation": 0
+
+}
+data = GOPRO_Large_all(args)
+
+
+print(data.get_list())
