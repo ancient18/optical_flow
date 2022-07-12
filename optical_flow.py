@@ -29,6 +29,11 @@ tfms = transforms.Compose([
 
 
 def calcuate_flow(img1, img2):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if device.type == 'cuda':
+        img1 = img1.cpu()
+        img2 = img2.cpu()
+
     len = img1.shape[0]
     arr = []
     for i in range(len):
