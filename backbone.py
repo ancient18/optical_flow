@@ -94,6 +94,7 @@ class Backbone(nn.Module):
         t3 = x
         x = self.layer9(x) + x
         x = self.layer10(x)
+        print(t1.shape, t2.shape, t3.shape,x.shape)
         x = [t1, t2, t3, x]
         x = torch.cat(x, dim=1)
         x = self.layer11(x)
@@ -112,15 +113,15 @@ tfms = transforms.Compose([
 ])
 
 
-# img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # BGR-->RGB
-# img = tfms(img)  # 转化为tensor 并 归一化
-# img = torch.rand([4, 3, 12, 24])
-# net = Backbone()
-# de_conv = DeformConv2d1(128, 128)
-# trans = Transpose()
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # BGR-->RGB
+img = tfms(img)  # 转化为tensor 并 归一化
+img = torch.rand([4, 3, 12, 24])
+net = Backbone()
+de_conv = DeformConv2d1(128, 128)
+trans = Transpose()
 
-# x = net(img)
-# print(x.shape)
+x = net(img)
+print(x.shape)
 # x, offset, modulation = de_conv(x)
 # x = trans(x)
 # print(offset.shape)
