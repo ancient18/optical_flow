@@ -10,6 +10,11 @@ from position_loss import PositionLoss
 from vgg import VGG
 
 
+# # 网络一：输入模糊图像，输出1.清晰图像，2.偏移量，3.权重
+
+# # 网络二：输入两帧图像，输出光流
+
+
 class MainBranchModule(nn.Module):
     def __init__(self):
         super(MainBranchModule, self).__init__()

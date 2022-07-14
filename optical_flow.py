@@ -70,6 +70,4 @@ def calcuate_flow(img1, img2):
 
 # print(calcuate_flow(im1, im2).shape)
 
-# # 网络一：输入模糊图像，输出1.清晰图像，2.偏移量，3.权重
 
-# # 网络二：输入两帧图像，输出光流
