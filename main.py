@@ -55,7 +55,7 @@ x2 = net2(im1, im2)
 # print(x.shape)
 
 
-L1 = torch.nn.MSELoss(reduction='sum')
+# L1 = torch.norm(x, 2)
 L2 = VGG()
 L3 = PositionLoss()
 x2 = F.interpolate(x2, scale_factor=0.5, mode='bilinear')
